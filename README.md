@@ -1,7 +1,7 @@
 # Project_3_Bank-Failures
 Project 3
 
-Team members: Ryan Lund, Hamid Nazari, Joseph Gonzalez, Lu Le, Stephanie Patricia
+Team members: Ryan Lund, Hamid Nazari, Joseph Gonzalez, Lu Ye, Stephanie Patricia
 
 Project 3 theme: 
 1) Identify bank failures that have occurred over the last 3 U.S. Recessions and the year that followed the Recession. The Recessions and time periods are: 'Dot com' Recession: 2000,2001; 'Great Recession': 2008,2009; and 'COVID Recession': 2020, 2021.
