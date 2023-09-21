@@ -1,69 +1,58 @@
-from flask import Flask, jsonify, request
 
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
 
+
+engine = create_engine("sqlite:///bank_db.db")
+
+conn =engine.connect()
+# reflect an existing database into a new model
+Base = automap_base()
+# reflect the tables
+Base.prepare(autoload_with=engine)
+
+session = Session(engine)
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bank_db.db'
-db = SQLAlchemy(app)
-
-class Bank(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    Fund = db.Column(db.BigInteger)
-    Bank_Name = db.Column(db.Text)
-    City = db.Column(db.Text)
-    State = db.Column(db.Text)
-    Bank_Failure_Date = db.Column(db.DateTime)
-    Population = db.Column(db.BigInteger)
-    Total_Housing_Units = db.Column(db.Text)
-    Owner_Occupied_Units = db.Column(db.Text)
-    Owner_Occupied_Rate = db.Column(db.Text)
-    Bachelors_or_higher = db.Column(db.Text)
-    Census_Year = db.Column(db.BigInteger)
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'Fund': self.Fund,
-            'Bank_Name': self.Bank_Name,
-            'City': self.City,
-            'State': self.State,
-            'Bank_Failure_Date': self.Bank_Failure_Date,
-            'Population': self.Population,
-            'Total_Housing_Units': self.Total_Housing_Units,
-            'Owner_Occupied_Units': self.Owner_Occupied_Units,
-            'Owner_Occupied_Rate': self.Owner_Occupied_Rate,
-            'Bachelors_or_higher': self.Bachelors_or_higher,
-            'Census_Year': self.Census_Year
-        }
 
 @app.route('/')
 def hello():
-    return "Hello, World!"
+    return "Hello, Replace with your text!"
 
 @app.route('/banks', methods=['GET'])
 def get_banks():
-    banks = Bank.query.all()
-    return jsonify([bank.to_dict() for bank in banks])
+    Banks = Base.classes.bank_sql
+    banks = session.query(Banks.Fund, Banks.Bank_Name, Banks.City, Banks.State,\
+                          Banks.Bank_Failure_Date, Banks.Population, Banks.Total_Housing_Units, \
+                            Banks.Owner_Occupied_Units, Banks.Owner_Occupied_Rate,\
+                            Banks.Bachelors_or_higher, Banks.Census_Year).all()
+    
+    all_banks = []
+    for fund, bank_name, city, state, \
+            bank_failure_date, population,\
+                total_housing_unnits, \
+                    owner_occupied_units, \
+                        owner_occupied_rate,\
+                            bachelors_or_higher,\
+                                census_year in banks:
+        new_dict = {}        
+        new_dict["fund"] = fund
+        new_dict["bank_name"] = bank_name
+        new_dict["city"] = city
+        new_dict["state"] =  state
+        new_dict["bank_failure_date"] = bank_failure_date
+        new_dict["population"] = population
+        new_dict["total_housing_unnits"] = total_housing_unnits
+        new_dict["owner_occupied_units"] = owner_occupied_units
+        new_dict["owner_occupied_rate"] = owner_occupied_rate
+        new_dict["bachelors_or_higher"] = bachelors_or_higher
+        new_dict["census_year"] = census_year
 
-@app.route('/banks', methods=['POST'])
-def add_bank():
-    data = request.get_json()
-    new_bank = Bank(
-        Fund=data['Fund'],
-        Bank_Name=data['Bank_Name'],
-        City=data['City'],
-        State=data['State'],
-        Bank_Failure_Date=data['Bank_Failure_Date'],
-        Population=data['Population'],
-        Total_Housing_Units=data['Total_Housing_Units'],
-        Owner_Occupied_Units=data['Owner_Occupied_Units'],
-        Owner_Occupied_Rate=data['Owner_Occupied_Rate'],
-        Bachelors_or_higher=data['Bachelors_or_higher'],
-        Census_Year=data['Census_Year']
-    )
-    db.session.add(new_bank)
-    db.session.commit()
-    return jsonify(new_bank.to_dict()), 201
+        all_banks.append(new_dict)
+
+    return jsonify(all_banks)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
